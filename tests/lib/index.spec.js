@@ -817,6 +817,7 @@ scenarios:
 
       let log
       let logs
+      let validateServiceForInvocationStub
       beforeEach(() => {
         ({ log } = console)
         logs = []
@@ -827,10 +828,12 @@ scenarios:
             logs.push(args.join(' '))
           }
         }
+        validateServiceForInvocationStub = sinon.stub(slsart.impl, 'validateServiceForInvocation').returns()
       })
       afterEach(() => {
         console.log = log
         process.argv = argv.slice(0)
+        validateServiceForInvocationStub.restore()
       })
       describe('error handling', () => {
         let implParseInputStub
@@ -849,6 +852,11 @@ scenarios:
           implParseInputStub.throws(new task.def.TaskError('task.error'))
           return slsart.invoke({ d: testJsonScriptStringified })
             .should.be.rejectedWith(task.def.TaskError, 'task.error')
+        })
+        it('handles and reports assets version mismatch errors, exiting the process', () => {
+          validateServiceForInvocationStub.throws(new Error('error'))
+          return slsart.invoke({ d: testJsonScriptStringified })
+            .should.be.rejectedWith(task.def.Error, 'error')
         })
         it('handles and reports unexpected errors, exiting the process', () => {
           implParseInputStub.throws(new Error('error'))
