@@ -690,6 +690,56 @@ scenarios:
       })
     })
 
+    describe('#validateServiceForInvocation', () => {
+      const defaultAssetsCwd = () => path.join(__dirname, 'func-assets-default')
+      const v0_0_1_AssetsCwd = () => path.join(__dirname, 'func-assets-v0-0-1') // eslint-disable-line camelcase
+
+      describe('default function asset versions', () => {
+        it('rejects if invocation options include monitoring', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({ monitoring: true }, {}, defaultAssetsCwd)
+          ).to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('rejects if script mode is "mon"', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, defaultAssetsCwd)
+          ).to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('rejects if script mode is "monitoring"', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, defaultAssetsCwd)
+          ).to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('does not reject default version otherwise', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, {}, defaultAssetsCwd)
+          ).not.to.throw()
+        })
+      })
+      describe('v 0.0.1 function asset versions', () => {
+        it('does not reject if invocation options include monitoring', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({ monitoring: true }, {}, v0_0_1_AssetsCwd)
+          ).not.to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('does not reject if script mode is "mon"', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MON }, v0_0_1_AssetsCwd)
+          ).not.to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('does not reject if script mode is "monitoring"', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, { mode: task.def.modes.MONITORING }, v0_0_1_AssetsCwd)
+          ).not.to.throw(/does not support invocation with the monitoring flag/)
+        })
+        it('does not reject default version otherwise', () => {
+          expect(() =>
+            slsart.impl.validateServiceForInvocation({}, {}, v0_0_1_AssetsCwd)
+          ).not.to.throw()
+        })
+      })
+    })
+
     describe('#findServicePath', () => {
       const lambdaPath = path.resolve('lib', 'lambda')
       const replaceImpl = (cwdResult, fileExistsResult, testFunc) => (() => {
